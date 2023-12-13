@@ -6,9 +6,18 @@ import {
   Body,
   Put,
   Delete,
+  Injectable,
+  UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PostService } from './posts.service';
 import { CreatePostDto } from './dto/createPostDto';
+import { AuthGuard } from '@nestjs/passport';
+import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
+import { JwtPayload } from 'src/auth/interface/jwt-payload.interface';
+
+@Injectable()
+export class JwtAuthGuard extends AuthGuard('jwt') {}
 
 @Controller('posts')
 export class PostController {
@@ -25,8 +34,16 @@ export class PostController {
   }
 
   @Post()
-  create(@Body() postDto: CreatePostDto) {
-    return this.postService.create(postDto);
+  @UseGuards(JwtAuthGuard)
+  async create(
+    @Body() postDto: CreatePostDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    // Check if the user is an admin before allowing post creation
+    if (!user.isAdmin) {
+      throw new UnauthorizedException('Only admins can create posts');
+    }
+    return await this.postService.create(postDto);
   }
 
   @Put(':id')
