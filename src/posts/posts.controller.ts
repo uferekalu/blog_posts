@@ -9,6 +9,7 @@ import {
   Injectable,
   UseGuards,
   UnauthorizedException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { PostService } from './posts.service';
 import { CreatePostDto } from './dto/createPostDto';
@@ -47,12 +48,29 @@ export class PostController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() postDto: CreatePostDto) {
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id', ParseIntPipe) id: string,
+    @Body() postDto: CreatePostDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    // Check if the user is an admin before allowing update post
+    if (!user.isAdmin) {
+      throw new UnauthorizedException('Only admins can update posts');
+    }
     return this.postService.update(+id, postDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  @UseGuards(JwtAuthGuard)
+  remove(
+    @Param('id', ParseIntPipe) id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    // Check if the user is an admin before allowing removal of post
+    if (!user.isAdmin) {
+      throw new UnauthorizedException('Only admins can delete posts');
+    }
     return this.postService.remove(+id);
   }
 }

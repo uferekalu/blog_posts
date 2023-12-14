@@ -4,9 +4,11 @@ import {
   Column,
   ManyToOne,
   ManyToMany,
-  JoinTable,
   PrimaryGeneratedColumn,
   JoinColumn,
+  JoinTable,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Category } from './category.entity';
 import { Tag } from './tag.entity';
@@ -19,14 +21,27 @@ export class Post {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ type: 'text' })
   description: string;
 
-  @ManyToOne(() => Category, category => category.posts)
+  @ManyToOne(() => Category, (category) => category.posts)
   @JoinColumn()
   category: Category;
 
   @ManyToMany(() => Tag, (tag) => tag.posts)
   @JoinTable()
   tags: Tag[];
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
+  createdAt: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
+  updatedAt: Date;
 }
