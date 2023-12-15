@@ -20,6 +20,10 @@ import { UserService } from './user/user.service';
 import { AuthService } from './auth/auth.service';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CommentModule } from './comment/comment.module';
+import { ReplyModule } from './reply/reply.module';
+import { LikeModule } from './like/like.module';
+import { DislikeModule } from './dislike/dislike.module';
 
 @Module({
   imports: [
@@ -53,6 +57,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     TagsModule,
     AuthModule,
     UserModule,
+    CommentModule,
+    ReplyModule,
+    LikeModule,
+    DislikeModule,
   ],
   controllers: [AppController, UserController, AuthController],
   providers: [AppService, UserService, AuthService, JwtStrategy],

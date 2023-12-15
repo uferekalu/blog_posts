@@ -3,50 +3,39 @@ import {
   Entity,
   Column,
   ManyToOne,
-  ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
-  JoinColumn,
-  JoinTable,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
+  JoinColumn,
 } from 'typeorm';
-import { Category } from './category.entity';
-import { Tag } from './tag.entity';
-import { Comment } from './comment.entity';
+import { Post } from './post.entity';
+import { Reply } from './reply.entity';
 import { Like } from './like.entity';
 import { Dislike } from './dislike.entity';
 import { User } from './user.entity';
 
 @Entity()
-export class Post {
+export class Comment {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  title: string;
+  text: string;
 
-  @Column({ type: 'text' })
-  description: string;
+  @ManyToOne(() => Post, (post) => post.comments)
+  post: Post;
 
-  @ManyToOne(() => Category, (category) => category.posts)
-  @JoinColumn()
-  category: Category;
+  @OneToMany(() => Reply, (reply) => reply.comment)
+  replies: Reply[];
 
-  @ManyToMany(() => Tag, (tag) => tag.posts)
-  @JoinTable()
-  tags: Tag[];
-
-  @OneToMany(() => Comment, (comment) => comment.post)
-  comments: Comment[];
-
-  @OneToMany(() => Like, (like) => like.post)
+  @OneToMany(() => Like, (like) => like.comment)
   likes: Like[];
 
-  @OneToMany(() => Dislike, (dislike) => dislike.post)
+  @OneToMany(() => Dislike, (dislike) => dislike.comment)
   dislikes: Dislike[];
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, (user) => user.comments)
   @JoinColumn()
   creator: User;
 

@@ -3,50 +3,35 @@ import {
   Entity,
   Column,
   ManyToOne,
-  ManyToMany,
   PrimaryGeneratedColumn,
-  JoinColumn,
-  JoinTable,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
-import { Category } from './category.entity';
-import { Tag } from './tag.entity';
 import { Comment } from './comment.entity';
 import { Like } from './like.entity';
 import { Dislike } from './dislike.entity';
 import { User } from './user.entity';
 
 @Entity()
-export class Post {
+export class Reply {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  title: string;
+  text: string;
 
-  @Column({ type: 'text' })
-  description: string;
+  @ManyToOne(() => Comment, (comment) => comment.replies)
+  comment: Comment;
 
-  @ManyToOne(() => Category, (category) => category.posts)
-  @JoinColumn()
-  category: Category;
-
-  @ManyToMany(() => Tag, (tag) => tag.posts)
-  @JoinTable()
-  tags: Tag[];
-
-  @OneToMany(() => Comment, (comment) => comment.post)
-  comments: Comment[];
-
-  @OneToMany(() => Like, (like) => like.post)
+  @OneToMany(() => Like, (like) => like.reply)
   likes: Like[];
 
-  @OneToMany(() => Dislike, (dislike) => dislike.post)
+  @OneToMany(() => Dislike, (dislike) => dislike.reply)
   dislikes: Dislike[];
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, (user) => user.replies)
   @JoinColumn()
   creator: User;
 
