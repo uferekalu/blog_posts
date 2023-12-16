@@ -10,12 +10,15 @@ import {
   UseGuards,
   UnauthorizedException,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { PostService } from './posts.service';
 import { CreatePostDto } from './dto/createPostDto';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { JwtPayload } from 'src/auth/interface/jwt-payload.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {}
@@ -36,29 +39,33 @@ export class PostController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('image'))
   async create(
     @Body() postDto: CreatePostDto,
+    @UploadedFile() image: Express.Multer.File,
     @CurrentUser() user: JwtPayload,
   ) {
     // Check if the user is an admin before allowing post creation
     if (!user.isAdmin) {
       throw new UnauthorizedException('Only admins can create posts');
     }
-    return await this.postService.create(postDto);
+    return await this.postService.create(postDto, image);
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('image'))
   update(
     @Param('id', ParseIntPipe) id: string,
     @Body() postDto: CreatePostDto,
+    @UploadedFile() image: Express.Multer.File,
     @CurrentUser() user: JwtPayload,
   ) {
     // Check if the user is an admin before allowing update post
     if (!user.isAdmin) {
       throw new UnauthorizedException('Only admins can update posts');
     }
-    return this.postService.update(+id, postDto);
+    return this.postService.update(+id, postDto, image);
   }
 
   @Delete(':id')

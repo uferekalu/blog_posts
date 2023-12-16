@@ -29,6 +29,9 @@ export class Post {
   @Column({ type: 'text' })
   description: string;
 
+  @Column({ nullable: true })
+  image: string;
+
   @ManyToOne(() => Category, (category) => category.posts)
   @JoinColumn()
   category: Category;

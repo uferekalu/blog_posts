@@ -24,6 +24,11 @@ import { CommentModule } from './comment/comment.module';
 import { ReplyModule } from './reply/reply.module';
 import { LikeModule } from './like/like.module';
 import { DislikeModule } from './dislike/dislike.module';
+import { FileService } from './file/file.service';
+import { Like } from './entities/like.entity';
+import { Dislike } from './entities/dislike.entity';
+import { Comment } from './entities/comment.entity';
+import { Reply } from './entities/reply.entity';
 
 @Module({
   imports: [
@@ -38,12 +43,21 @@ import { DislikeModule } from './dislike/dislike.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [Post, Tag, Category, User],
+        entities: [Post, Tag, Category, User, Like, Dislike, Comment, Reply],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Post, Tag, Category, User]),
+    TypeOrmModule.forFeature([
+      Post,
+      Tag,
+      Category,
+      User,
+      Like,
+      Dislike,
+      Comment,
+      Reply,
+    ]),
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
@@ -63,6 +77,6 @@ import { DislikeModule } from './dislike/dislike.module';
     DislikeModule,
   ],
   controllers: [AppController, UserController, AuthController],
-  providers: [AppService, UserService, AuthService, JwtStrategy],
+  providers: [AppService, UserService, AuthService, JwtStrategy, FileService],
 })
 export class AppModule {}

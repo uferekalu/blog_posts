@@ -1,5 +1,5 @@
 // auth.service.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
@@ -33,25 +33,7 @@ export class AuthService {
       sub: user.id,
       username: user.username,
       isAdmin: user.isAdmin,
+      picture: user.picture,
     });
-  }
-
-  async signup(
-    username: string,
-    password: string,
-    isAdmin: boolean,
-  ): Promise<{ accessToken: string }> {
-    const existingUser = await this.userService.findByUsername(username);
-
-    if (existingUser) {
-      throw new UnauthorizedException('Username is already taken');
-    }
-    const newUser = await this.userService.createUser(
-      username,
-      password,
-      isAdmin,
-    );
-    const accessToken = await this.generateToken(newUser);
-    return { accessToken };
   }
 }

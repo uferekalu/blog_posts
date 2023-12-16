@@ -1,10 +1,10 @@
 {
-    "type": "postgres",
-    "host": "localhost",
-    "port": 5432,
-    "username": "your_username",
-    "password": "your_password",
-    "database": "blog",
-    "entities": ["dist/**/*.entity{.ts,.js}"],
-    "synchronize": true
-  }
+  "type": "mysql",
+  "host": "localhost",
+  "port": 3306,
+  "username": "root",
+  "password": "INTELLIGENTgoodnews1234@@",
+  "database": "blog_post",
+  "entities": ["dist/**/*.entity{.ts,.js}"],
+  "synchronize": true
+}
