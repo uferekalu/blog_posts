@@ -95,4 +95,19 @@ export class PostController {
   ) {
     return this.commentService.makeAComment(postId, createCommentDto, user);
   }
+
+  @Put(':postId/comment/:commentId')
+  editAComment(
+    @Param('postId', ParseIntPipe) postId: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
+    @Body() createCommentDto: CreateCommentDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.commentService.editAComment(
+      postId,
+      commentId,
+      createCommentDto,
+      user,
+    );
+  }
 }

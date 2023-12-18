@@ -44,7 +44,6 @@ export class CommentService {
       where: { id: user?.sub },
     });
     const { content } = createCommentDto;
-    console.log('content', content);
     if (!post) {
       throw new HttpException(
         {
@@ -60,5 +59,50 @@ export class CommentService {
     });
 
     return await this.commentRepository.save(comment);
+  }
+
+  async editAComment(
+    postId: number,
+    commentId: number,
+    createCommentDto: CreateCommentDto,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<Comment> {
+    const post = await this.postRepository.findOne({ where: { id: postId } });
+    const creator = await this.userRepository.findOne({
+      where: { id: user?.sub },
+    });
+    const existingComment = await this.commentRepository.findOne({
+      where: { id: commentId },
+      relations: ['creator'],
+    });
+    const { content } = createCommentDto;
+    if (!existingComment) {
+      throw new HttpException(
+        {
+          message: 'Comment not found',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    console.log('existing creator', existingComment?.creator);
+    console.log('creator', creator);
+
+    if (existingComment?.creator !== creator) {
+      throw new HttpException(
+        {
+          message: 'You cannot update this comment as you are not the creator',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Update comment
+    existingComment.text = content || existingComment?.text;
+
+    // save updated comment
+    await this.commentRepository.save(existingComment);
+
+    return this.findOne(commentId);
   }
 }
