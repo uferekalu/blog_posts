@@ -12,10 +12,13 @@ export class AuthController {
   async signin(
     @Body() userData: { username: string; password: string },
   ): Promise<{ accessToken: string }> {
+    console.log('Request payload:', userData);
     const user = await this.authService.validateUser(
       userData.username,
       userData.password,
     );
+
+    console.log('validated user', user);
 
     if (!user) {
       return { accessToken: null };

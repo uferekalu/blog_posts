@@ -34,7 +34,7 @@ export class UserService {
       picture: await this.fileService.upload(file),
     });
 
-    await user.hashPassword(); // Hash the password
+    // await user.hashPassword(); // Hash the password
 
     return await this.userRepository.save(user);
   }

@@ -29,6 +29,7 @@ import { Like } from './entities/like.entity';
 import { Dislike } from './entities/dislike.entity';
 import { Comment } from './entities/comment.entity';
 import { Reply } from './entities/reply.entity';
+import { LocalStrategy } from './auth/local.strategy';
 
 @Module({
   imports: [
@@ -77,6 +78,13 @@ import { Reply } from './entities/reply.entity';
     DislikeModule,
   ],
   controllers: [AppController, UserController, AuthController],
-  providers: [AppService, UserService, AuthService, JwtStrategy, FileService],
+  providers: [
+    AppService,
+    UserService,
+    AuthService,
+    JwtStrategy,
+    FileService,
+    LocalStrategy,
+  ],
 })
 export class AppModule {}

@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Like } from './like.entity';
@@ -48,6 +49,7 @@ export class User {
   replies: Reply[];
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }

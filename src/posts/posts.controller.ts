@@ -19,13 +19,18 @@ import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { JwtPayload } from 'src/auth/interface/jwt-payload.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateCommentDto } from 'src/comment/dto/createCommentDto';
+import { CommentService } from 'src/comment/comment.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {}
 
 @Controller('posts')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+    private readonly postService: PostService,
+    private readonly commentService: CommentService,
+  ) {}
 
   @Get()
   findAll() {
@@ -37,35 +42,35 @@ export class PostController {
     return this.postService.findOne(+id);
   }
 
+  @UseInterceptors(FileInterceptor('file'))
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image'))
   async create(
     @Body() postDto: CreatePostDto,
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: JwtPayload,
   ) {
     // Check if the user is an admin before allowing post creation
     if (!user.isAdmin) {
       throw new UnauthorizedException('Only admins can create posts');
     }
-    return await this.postService.create(postDto, image);
+    return await this.postService.create(postDto, file, user);
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('file'))
   update(
     @Param('id', ParseIntPipe) id: string,
     @Body() postDto: CreatePostDto,
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: JwtPayload,
   ) {
     // Check if the user is an admin before allowing update post
     if (!user.isAdmin) {
       throw new UnauthorizedException('Only admins can update posts');
     }
-    return this.postService.update(+id, postDto, image);
+    return this.postService.update(+id, postDto, file);
   }
 
   @Delete(':id')
@@ -79,5 +84,15 @@ export class PostController {
       throw new UnauthorizedException('Only admins can delete posts');
     }
     return this.postService.remove(+id);
+  }
+
+  @Post(':postId/comment')
+  // @UseGuards(JwtAuthGuard)
+  makeAComment(
+    @Param('postId', ParseIntPipe) postId: number,
+    @Body() createCommentDto: CreateCommentDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.commentService.makeAComment(postId, createCommentDto, user);
   }
 }

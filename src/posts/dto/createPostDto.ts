@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsNotEmpty, IsInt, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -10,11 +10,11 @@ export class CreatePostDto {
   @IsNotEmpty()
   description: string;
 
-  @IsInt()
+  @IsString()
   @IsNotEmpty()
-  categoryId: number;
+  categoryId: string;
 
-  @IsArray()
-  @IsInt({ each: true })
-  tagIds: number[];
+  // @IsArray()
+  // @IsInt({ each: true })
+  // tagIds: number[];
 }
