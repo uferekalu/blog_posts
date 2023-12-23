@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // src/controllers/category.controller.ts
 import {
   Controller,

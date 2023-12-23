@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // user.controller.ts
 import {
   Controller,
@@ -6,6 +7,8 @@ import {
   UnauthorizedException,
   UseInterceptors,
   UploadedFile,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -26,7 +29,13 @@ export class UserController {
     );
 
     if (existingUser) {
-      throw new UnauthorizedException('Username is already taken');
+      throw new HttpException(
+        {
+          error: 'Username is already taken',
+        },
+        HttpStatus.BAD_REQUEST
+      )
+      // throw new UnauthorizedException('Username is already taken');
     }
 
     await this.userService.createUser(

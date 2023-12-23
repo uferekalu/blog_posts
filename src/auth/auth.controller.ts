@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // auth.controller.ts
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -12,13 +13,10 @@ export class AuthController {
   async signin(
     @Body() userData: { username: string; password: string },
   ): Promise<{ accessToken: string }> {
-    console.log('Request payload:', userData);
     const user = await this.authService.validateUser(
       userData.username,
       userData.password,
     );
-
-    console.log('validated user', user);
 
     if (!user) {
       return { accessToken: null };

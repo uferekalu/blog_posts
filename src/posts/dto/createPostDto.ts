@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, IsInt } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()

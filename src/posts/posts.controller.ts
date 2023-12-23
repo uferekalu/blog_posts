@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Controller,
   Get,
@@ -12,15 +13,16 @@ import {
   ParseIntPipe,
   UseInterceptors,
   UploadedFile,
-} from '@nestjs/common';
-import { PostService } from './posts.service';
-import { CreatePostDto } from './dto/createPostDto';
-import { AuthGuard } from '@nestjs/passport';
-import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
-import { JwtPayload } from 'src/auth/interface/jwt-payload.interface';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateCommentDto } from 'src/comment/dto/createCommentDto';
-import { CommentService } from 'src/comment/comment.service';
+} from '@nestjs/common'
+import { PostService } from './posts.service'
+import { CreatePostDto } from './dto/createPostDto'
+import { AuthGuard } from '@nestjs/passport'
+import { CurrentUser } from 'src/auth/decorator/current-user.decorator'
+import { JwtPayload } from 'src/auth/interface/jwt-payload.interface'
+import { FileInterceptor } from '@nestjs/platform-express'
+import { CreateCommentDto } from 'src/comment/dto/createCommentDto'
+import { CommentService } from 'src/comment/comment.service'
+import * as fs from 'fs'
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {}
@@ -29,32 +31,34 @@ export class JwtAuthGuard extends AuthGuard('jwt') {}
 export class PostController {
   constructor(
     private readonly postService: PostService,
-    private readonly commentService: CommentService,
+    private readonly commentService: CommentService
   ) {}
 
   @Get()
   findAll() {
-    return this.postService.findAll();
+    return this.postService.findAll()
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.postService.findOne(+id);
+    return this.postService.findOne(+id)
   }
 
-  @UseInterceptors(FileInterceptor('file'))
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
   @UseGuards(JwtAuthGuard)
   async create(
     @Body() postDto: CreatePostDto,
     @UploadedFile() file: Express.Multer.File,
-    @CurrentUser() user: JwtPayload,
+    @CurrentUser() user: JwtPayload
   ) {
+    console.log('image', file)
     // Check if the user is an admin before allowing post creation
     if (!user.isAdmin) {
-      throw new UnauthorizedException('Only admins can create posts');
+      throw new UnauthorizedException('Only admins can create posts')
     }
-    return await this.postService.create(postDto, file, user);
+
+    return await this.postService.create(postDto, file, user)
   }
 
   @Put(':id')
@@ -64,26 +68,26 @@ export class PostController {
     @Param('id', ParseIntPipe) id: string,
     @Body() postDto: CreatePostDto,
     @UploadedFile() file: Express.Multer.File,
-    @CurrentUser() user: JwtPayload,
+    @CurrentUser() user: JwtPayload
   ) {
     // Check if the user is an admin before allowing update post
     if (!user.isAdmin) {
-      throw new UnauthorizedException('Only admins can update posts');
+      throw new UnauthorizedException('Only admins can update posts')
     }
-    return this.postService.update(+id, postDto, file);
+    return this.postService.update(+id, postDto, file)
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   remove(
     @Param('id', ParseIntPipe) id: string,
-    @CurrentUser() user: JwtPayload,
+    @CurrentUser() user: JwtPayload
   ) {
     // Check if the user is an admin before allowing removal of post
     if (!user.isAdmin) {
-      throw new UnauthorizedException('Only admins can delete posts');
+      throw new UnauthorizedException('Only admins can delete posts')
     }
-    return this.postService.remove(+id);
+    return this.postService.remove(+id)
   }
 
   @Post(':postId/comment')
@@ -91,9 +95,9 @@ export class PostController {
   makeAComment(
     @Param('postId', ParseIntPipe) postId: number,
     @Body() createCommentDto: CreateCommentDto,
-    @CurrentUser() user: JwtPayload,
+    @CurrentUser() user: JwtPayload
   ) {
-    return this.commentService.makeAComment(postId, createCommentDto, user);
+    return this.commentService.makeAComment(postId, createCommentDto, user)
   }
 
   @Put(':postId/comment/:commentId')
@@ -101,13 +105,13 @@ export class PostController {
     @Param('postId', ParseIntPipe) postId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body() createCommentDto: CreateCommentDto,
-    @CurrentUser() user: JwtPayload,
+    @CurrentUser() user: JwtPayload
   ) {
     return this.commentService.editAComment(
       postId,
       commentId,
       createCommentDto,
-      user,
-    );
+      user
+    )
   }
 }

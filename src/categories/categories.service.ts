@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // src/services/category.service.ts
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
