@@ -81,18 +81,22 @@ export class PostService {
   }
 
   async create(
-    postDto: CreatePostDto,
+    title: string,
+    description: string,
+    categoryId: number,
+    tagIds: string,
     file: Express.Multer.File,
     @CurrentUser() user: JwtPayload
   ): Promise<Post> {
-    console.log('fileimage', file)
-    const { title, description, categoryId /*tagIds*/ } = postDto
     const existingCategory = await this.categoryRepository.findOne({
-      where: { id: parseInt(categoryId) },
+      where: { id: categoryId },
     })
-    // const existingTags = await this.tagRepository.findBy({
-    //   id: In(tagIds.map((id) => id)),
-    // });
+
+    const parsedTagIds = JSON.parse(tagIds) as number[];
+    const existingTags = await this.tagRepository.find({
+      where: { id: In(parsedTagIds || []) },
+    });
+
     const creator = await this.userRepository.findOne({
       where: { id: user?.sub },
     })
@@ -103,22 +107,17 @@ export class PostService {
         HttpStatus.BAD_REQUEST
       )
     }
-    // const data = {
-    //   title,
-    //   description,
-    //   category: existingCategory,
-    //   // tags: existingTags,
-    //   image: await this.fileService.postUpload(file),
-    //   creator,
-    // };
+    // Create a new post entity
     const post = this.postRepository.create({
       title,
       description,
       category: existingCategory,
-      // tags: existingTags,
-      image: await this.fileService.postUpload(file),
+      tags: existingTags,
       creator,
     })
+
+    // Set the image property with the file name
+    post.image = file?.filename
     return await this.postRepository.save(post)
   }
 
@@ -127,13 +126,13 @@ export class PostService {
     postDto: CreatePostDto,
     file: Express.Multer.File
   ): Promise<Post> {
-    const { title, description, categoryId /*tagIds*/ } = postDto
+    const { title, description, categoryId, tagIds } = postDto
     const existingCategory = await this.categoryRepository.findOne({
-      where: { id: parseInt(categoryId) },
+      where: { id: categoryId },
     })
-    // const existingTags = await this.tagRepository.findBy({
-    //   id: In(tagIds.map((id) => id)),
-    // });
+    const existingTags = await this.tagRepository.findBy({
+      id: In(tagIds.map((id) => id)),
+    })
     const existingPost = await this.postRepository.findOne({
       where: { id: id },
       relations: ['category', 'tags'],
@@ -151,7 +150,7 @@ export class PostService {
     existingPost.image = imageUpload || existingPost.image
 
     // Update tags by clearing the existing ones and adding the new ones
-    // existingPost.tags = existingTags;
+    existingPost.tags = existingTags
 
     // Save the updated post
     await this.postRepository.save(existingPost)

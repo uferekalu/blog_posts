@@ -22,7 +22,8 @@ import { JwtPayload } from 'src/auth/interface/jwt-payload.interface'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { CreateCommentDto } from 'src/comment/dto/createCommentDto'
 import { CommentService } from 'src/comment/comment.service'
-import * as fs from 'fs'
+import { diskStorage } from 'multer'
+import { Helper } from 'src/utils/helper'
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {}
@@ -45,10 +46,23 @@ export class PostController {
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: Helper.filePath,
+        filename: Helper.customFileName,
+      }),
+    })
+  )
   @UseGuards(JwtAuthGuard)
   async create(
-    @Body() postDto: CreatePostDto,
+    @Body()
+    postData: {
+      title: string
+      description: string
+      categoryId: number
+      tagIds: string
+    },
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: JwtPayload
   ) {
@@ -58,7 +72,14 @@ export class PostController {
       throw new UnauthorizedException('Only admins can create posts')
     }
 
-    return await this.postService.create(postDto, file, user)
+    return await this.postService.create(
+      postData.title,
+      postData.description,
+      postData.categoryId,
+      postData.tagIds,
+      file,
+      user
+    )
   }
 
   @Put(':id')

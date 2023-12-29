@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // src/controllers/tag.controller.ts
 import {
   Controller,

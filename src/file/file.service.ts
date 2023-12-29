@@ -60,7 +60,7 @@ export class FileService {
       const filename = `${uuidv4()}.${fileExtension}`
       const filePath = path.join(this.uploadDirectory, filename)
 
-      await fs.writeFileSync(filePath, file.mimetype)
+      await fs.writeFileSync(filePath, file?.buffer)
       return filePath
     } catch (error) {
       console.error(`Error during file upload: ${error.message}`)

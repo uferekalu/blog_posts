@@ -10,11 +10,11 @@ export class CreatePostDto {
   @IsNotEmpty()
   description: string;
 
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  categoryId: string;
+  categoryId: number;
 
-  // @IsArray()
-  // @IsInt({ each: true })
-  // tagIds: number[];
+  @IsArray()
+  @IsInt({ each: true })
+  tagIds: number[];
 }
