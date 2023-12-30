@@ -83,11 +83,24 @@ export class PostController {
   }
 
   @Put(':id')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: Helper.filePath,
+        filename: Helper.customFileName,
+      }),
+    })
+  )
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
   update(
     @Param('id', ParseIntPipe) id: string,
-    @Body() postDto: CreatePostDto,
+    @Body()
+    postData: {
+      title: string
+      description: string
+      categoryId: number
+      tagIds: string
+    },
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: JwtPayload
   ) {
@@ -95,7 +108,15 @@ export class PostController {
     if (!user.isAdmin) {
       throw new UnauthorizedException('Only admins can update posts')
     }
-    return this.postService.update(+id, postDto, file)
+    return this.postService.update(
+      +id,
+      postData.title,
+      postData.description,
+      postData.categoryId,
+      postData.tagIds,
+      file,
+      user
+    )
   }
 
   @Delete(':id')

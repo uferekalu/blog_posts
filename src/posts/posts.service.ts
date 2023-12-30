@@ -117,22 +117,35 @@ export class PostService {
     })
 
     // Set the image property with the file name
-    post.image = file?.filename
+    post.image = `/images/${file?.filename}`;
     return await this.postRepository.save(post)
   }
 
   async update(
     id: number,
-    postDto: CreatePostDto,
-    file: Express.Multer.File
+    title: string,
+    description: string,
+    categoryId: number,
+    tagIds: string,
+    file: Express.Multer.File,
+    @CurrentUser() user: JwtPayload
   ): Promise<Post> {
-    const { title, description, categoryId, tagIds } = postDto
+
     const existingCategory = await this.categoryRepository.findOne({
       where: { id: categoryId },
     })
-    const existingTags = await this.tagRepository.findBy({
-      id: In(tagIds.map((id) => id)),
+
+    const creator = await this.userRepository.findOne({
+      where: { id: user?.sub },
     })
+
+    const parsedTagIds = JSON.parse(tagIds) as number[];
+    const existingTags = await this.tagRepository.find({
+      where: { id: In(parsedTagIds || []) },
+    });
+    // const existingTags = await this.tagRepository.findBy({
+    //   id: In(tagIds.map((id) => id)),
+    // })
     const existingPost = await this.postRepository.findOne({
       where: { id: id },
       relations: ['category', 'tags'],
@@ -141,13 +154,12 @@ export class PostService {
       throw new HttpException('Post not found', HttpStatus.BAD_REQUEST)
     }
 
-    const imageUpload = await this.fileService.upload(file)
-
     // Update post properties
     existingPost.title = title || existingPost.title
     existingPost.description = description || existingPost.description
     existingPost.category = existingCategory || existingPost.category
-    existingPost.image = imageUpload || existingPost.image
+    existingPost.image = file?.filename ? `/images/${file?.filename}` : existingPost.image;
+    existingPost.creator = creator
 
     // Update tags by clearing the existing ones and adding the new ones
     existingPost.tags = existingTags
